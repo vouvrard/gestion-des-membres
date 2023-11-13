@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-6 offset-md-3">
+                <div class="card text-center shadow rounded mt-5">
+                    <div class="card-header card-header-color text-white">
+                        Authentification
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text bg-danger text-white">{{ message }}</p>
+                        <p class="card-text">Connexion au site de gestion des compétences des coopérateurs</p>
+                        <a class="btn btn-primary" href="login" role=""button>Connexion</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

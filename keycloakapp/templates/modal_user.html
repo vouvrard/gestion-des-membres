@@ -1,0 +1,139 @@
+<div class="modal" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"></h5>
+          <div class="alert alert-danger ms-4 message">Le coopérateur existe déjà</div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="visually-hidden" id="user-id"></div>
+          <div class="visually-hidden" id="action"></div>
+            <form>
+                <div class="row align-items-center">
+                    <div class="col-2">
+                        <label for="inputLastName" class="col-form-label">Nom</label>
+                    </div>
+                    <div class="col-10">
+                        <input type="text" id="modal-lastName" class="form-control" name="lastName">
+                    </div>
+                </div>
+                <div class="row g-3 mt-1 align-items-center">
+                    <div class="col-2">
+                        <label for="inputFirstName" class="col-form-label">Prénom</label>
+                    </div>
+                    <div class="col-10">
+                      <input type="text" id="modal-firstName" class="form-control" name="firstName">
+                    </div>
+                </div>
+                <div class="row g-3 mt-1 align-items-center">
+                    <div class="col-2">
+                        <label for="inputEmail" class="form-label">Email</label>
+                    </div>
+                    <div class="col-10">
+                      <input type="email" id="modal-email" class="form-control" name="email">
+                    </div>
+                </div>
+                <div class="row g-3 mt-1 align-items-center">
+                  <div class="col-4">
+                      <label for="inputId" class="form-label">Numéro de coopérateur</label>
+                  </div>
+                  <div class="col-8">
+                    <input type="text" id="modal-id" class="form-control" name="id">
+                  </div>
+              </div>
+                <div class="row g-3 mt-1 align-items-center">
+                    <div class="col-2">
+                        <label for="inputAdress" class="form-label">Adresse</label>
+                    </div>
+                    <div class="col-10">
+                      <input type="text" id="modal-adress" class="form-control" name="adress">
+                    </div>
+                </div>
+                <div class="row g-3 mt-1 align-items-center">
+                  <div class="col-2">
+                      <label for="inputAdressAdd" class="form-label">Adresse Complément</label>
+                  </div>
+                  <div class="col-10">
+                    <input type="text" id="modal-adress-add" class="form-control" name="adress-add">
+                  </div>
+              </div>
+                <div class="row g-3 mt-1 align-items-center">
+                    <div class="col-2">
+                        <label for="inputPostalZip" class="form-label">Code postal</label>
+                    </div>
+                    <div class="col-3">
+                      <input type="text" id="modal-postalZip" class="form-control" name="postalZip">
+                    </div>
+                    <div class="col-1">
+                        <label for="inputCity" class="form-label">Ville</label>
+                    </div>
+                    <div class="col-6">
+                      <input type="text" id="modal-city" class="form-control" name="city">
+                    </div>
+                </div>
+                <div class="row g-3 mt-1 align-items-center">
+                    <div class="col-2">
+                        <label for="inputPhone" class="form-label">Téléphone</label>
+                    </div>
+                    <div class="col-10">
+                      <input type="text" id="modal-phone" class="form-control" name="phone">
+                    </div>
+                </div>
+                <div class="row g-3 mt-1 align-items-center">
+                    <div class="col-3">
+                        <label for="inputBirthday" class="form-label">Date de naissance</label>
+                    </div>
+                    <div class="col-9">
+                      <input type="text" id="modal-birthday" class="form-control" name="birthday">
+                    </div>
+                </div>
+                <div class="row g-3 mt-1 align-items-center">
+                  <div class="col-3">
+                      <label for="inputProfession" class="form-label">Profession</label>
+                  </div>
+                  <div class="col-9">
+                    <input type="text" id="modal-profession" class="form-control" name="profession">
+                  </div>
+                </div>
+                <div class="row g-3 mt-1 align-items-center">
+                    <div class="col-2">
+                        <label for="inputGender" class="form-label">Genre</label>
+                    </div>
+                    <div class="col-10">
+                      <select type="text" id="modal-gender" class="form-select" name="gender">
+                        <option value="" selected>...</option>
+                        <option value="Femme">Femme</option>
+                        <option value="Homme">Homme</option>
+                      </select>
+                    </div>
+                </div>
+                <div class="row g-3 mt-1 align-items-center">
+                  <div class="col-2">
+                      <label for="inputSpouse" class="form-label">Conjoint</label>
+                  </div>
+                  <div class="col-10">
+                    <input type="text" id="modal-spouse" class="form-control" name="spouse">
+                  </div>
+              </div>
+              <div class="row g-3 mt-1 align-items-center">
+                <div class="col-2">
+                    <label for="inputStatus" class="form-label">Statut</label>
+                </div>
+                <div class="col-10">
+                  <select type="text" id="modal-status" class="form-select" name="status">
+                    <option value="Actif">Actif</option>
+                    <option value="Inactif">Inactif</option>
+                  </select>
+                </div>
+            </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            <button type="button" class="btn btn-primary" onclick="user()">Valider</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  

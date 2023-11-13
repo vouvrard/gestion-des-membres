@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% include "menu.html" %}
+    <div class="card">
+        <div class="card-body text-center text-success"><h4>Bienvenue dans l'outil de gestion des coopérateurs utilisateurs d'Elefan</h4></div>
+        <div class="text-center"><img src="{{ url_for('static', filename= 'images/elefan.png') }}"></div>
+    </div>
+{% endblock content %}

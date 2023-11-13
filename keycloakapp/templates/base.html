@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="">
+    <title>Gestion des formations Elefan - Accueil</title>
+
+    <link href="{{ url_for('static', filename= 'css/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename= 'css/fontawesome/fontawesome.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename= 'css/fontawesome/solid.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename= 'css/fontawesome/brand.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename= 'css/style.css') }}" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <div id="header" class="row align-items-center mt-3 mb-4 pb-3 pt-2 border rounded">
+            <div class="col-3 text-center"><img src="{{ url_for('static', filename= 'images/logo.jpg') }}"></div>
+            <div class="col-6 pt-4 text-center text-warning"><h2>Outil de gestion des coopérateurs</h2></div>
+            {% if admin_name %}
+                <div class="col-3 pt-4 text-center">
+                    <h5>{{admin_name}} <i class="fa-solid fa-arrow-right-from-bracket" onclick="logout()"></i></h5>
+                </div>
+            {% endif %}
+        </div>
+        <div id="main" class="row mt-3 mb-4">
+            <div class="col-12">
+            {% block content %}{% endblock content %}
+            </div>
+        </div>
+        <div id="footer" class="row align-items-center">
+            <div class="col-12 text-center">
+                <i>Version {{ version }} - Copyright Scopeli - 2023</i>
+            </div>
+        </div>
+    </div>
+</body>
+    <script src="{{ url_for('static', filename= 'js/bootstrap/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename= 'js/jquery-3.7.0.min.js') }}"></script>
+    <script src="{{ url_for('static', filename= 'js/jquery.cookie.js') }}"></script>
+    <script src="{{ url_for('static', filename= 'js/snippets.js') }}"></script>
+</body>
+
+</html>

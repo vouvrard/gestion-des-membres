@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+    api-service:
+        image: elefan-user-management:test
+        restart: always
+        build: .
+        volumes: 
+            - .:/usr/src/keycloakapp/
+        networks:
+            - backend
+        ports: 
+            - 5000:5000
+        env_file: .docker/variables.env
+        secrets:
+            - keycloak_secret_key
+
+secrets:
+   keycloak_secret_key:
+     file: .docker/keycloak_secret_key.txt
+
+networks:
+    backend:
+        name: backend

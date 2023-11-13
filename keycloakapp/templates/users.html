@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% include "menu.html" %}
+    <div class="container pt-3">
+      <div class="row">
+        <div class="col-4 border pt-2 rounded">
+          <div class="card">
+            <div class="card-header card-header-color text-white">Recherche</div>
+            <div class="card-body">
+              <form action="/users" method="get">
+                <div>
+                  <label for="inputLastName" class="form-label">Nom</label>
+                </div>
+                <div class="mb-3 col-auto">
+                  {%if lastName %}
+                  <input type="text" id="lastName" name="lastName" value="{{lastName}}">
+                  {% else %}
+                  <input type="text" id="lastName" name="lastName">
+                  {% endif %}
+                </div>
+                <div>
+                  <label for="inputFirstName" class="form-label">Prénom</label>
+                </div>
+                <div class="mb-3 col-auto">
+                  {%if lastName %}
+                    <input type="text" id="firstName" name="firstName" value="{{firstName}}">
+                  {% else %}
+                    <input type="text" id="firstName" name="firstName">
+                  {% endif %}
+                </div>
+                <div>
+                  <label for="inputAppId" class="form-label">Numéro Coopérateur</label>
+                </div>
+                <div class="mb-3 col-auto">
+                  {%if appId %}
+                    <input type="text" id="appId" name="appId" value="{{appId}}">
+                  {% else %}
+                    <input type="text" id="appId" name="appId">
+                  {% endif %}
+                </div>
+                <button type="submit" class="btn btn-primary"><span class="fa-solid fa-magnifying-glass"></span></button>
+                <div class="btn btn-warning" onclick="erase()"><span class="fa-solid fa-eraser"></span></div>
+              </form>
+            </div>
+          </div>
+          <div class="card mt-3">
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#userModal" data-value="" data-action="new" data-title="Nouveau coopérateur">Nouveau</button>
+          </div>
+        </div>
+        <div class="col-7 ms-2 pt-2 border rounded" style="min-height: 500px">
+          {% if message %}<div class="alert alert-danger">{{ message }}</div>{% endif %}
+          {% for key, value in users_to_display.items() %}
+          {% set attributes = value.user['attributes'] %}
+          <div class="row align-items-center mb-2 ms-1 me-1 border rounded shadow bg-white user-container" id="{{value.user['id']}}">
+            <div class="col-6 text-start name">
+                  <b>{{ value.user['lastName'] }} {{ value.user['firstName'] }}</b></br> 
+                  <i>{{ attributes.id[0] }}</i>
+            </div>
+
+            <div class="col-5 mt-2 mb-2 list" id="{{value.user['id']}}">
+              <div class="card mb-2 ps-2">
+                <div class="mb-2"><div class="fa-solid fa-envelope icon"></div> {{ value.user['email'] }}</div>
+                <div><div class="fa-solid fa-location-dot icon"></div> {{ attributes['adresse.adresse'][0] }}</div>
+                {% if attributes['adresse.complement'][0] %}
+                <div><div class="fa-solid fa-empty icon"></div> {{ attributes['adresse.complement'][0] }}</div>
+                {% endif %}
+                <div class="mb-2"><div class="fa-solid fa-empty icon"></div> {{ attributes['adresse.code_postal'][0] }} - {{ attributes['adresse.ville'][0] }}</div>
+                <div class="mb-2"><div class="fa-solid fa-phone icon"></div> {{ attributes['telephone'][0] }}</div>
+                <div class="mb-2"><div class="fa-solid fa-calendar-days icon"></div> {{ attributes['date_naissance'][0] }}</div>
+                <div class="mb-2"><div class="fa-solid fa-circle-info icon"></div> {{ attributes['profession'][0] }}</div>
+                <div class="mb-2"><div class="fa-solid fa-mars-and-venus icon"></div> {{ attributes['genre'][0] }}</div>
+                <div class="mb-2"><div class="fa-solid fa-user-group icon"></div> {{ attributes['conjoint'][0] }}</div>
+                {% if attributes['statut'][0] == "Actif" %}
+                <div><div class="fa-solid fa-check icon"></div> {{ attributes['statut'][0] }}</div>
+                {% else %}
+                <div><div class="fa-solid fa-xmark icon"></div> {{ attributes['statut'][0] }}</div>
+                {% endif %}
+                <div class="mt-3 mb-2 pt-2 text-center border-top"><button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#userModal" data-value="{{value}}" data-action="modify" data-title="Modification du coopérateur">Modifier</button></div>
+              </div>
+                <div class="card">
+                  {% for group in groups %}
+                  {% if group['name'] in value.user_groups|map(attribute="name") %}
+                    <button class="list-group-item active bg-success" onclick="removeGroup(this)" data-group-id="{{group['id']}}" data-user-id="{{value.user['id']}}">
+                      {{ group['name'] }}
+                    </button>
+                    {% else %}
+                      <button class="list-group-item" onclick="addGroup(this)" data-group-id="{{group['id']}}" data-user-id="{{value.user['id']}}">
+                        {{ group['name'] }}
+                      </button>
+                  {% endif %}
+                  {% endfor %}
+                </div>
+              <!--<div class="mt-3"><button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal" data-value="{{value}}" data-action="modify" data-title="Modification du coopérateur">Modifier</button></div>-->
+            </div>
+          <div class="col-1"></div>
+        </div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+{% include "modal_user.html" %}
+
+{% endblock content %}

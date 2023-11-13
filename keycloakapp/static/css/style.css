@@ -1,0 +1,55 @@
+body { 
+    height: 100%; 
+    margin: 0; 
+    padding: 0;
+}
+
+#main { 
+    height: 100%;
+    position: relative;
+    padding-bottom: 100px;   /* Hauteur du pied de page */
+ }
+
+#footer {
+    /*position: absolute;*/
+    /*bottom: 0;  /* on le colle en bas */
+    /*width:100%;*/
+    height: 100px;   /* Hauteur du pied de page */
+ }
+
+ .card-header-color {
+    background-color: #0d6efd;
+ }
+
+.name { 
+    font-size: 1.2em; 
+}
+
+.name:hover { 
+    cursor: pointer; 
+}
+
+.message {
+    visibility: hidden;
+}
+
+.header-primary {
+    background-color: #0d6efd;
+    color: #fff;
+}
+
+.header-success {
+    background-color: #198754;
+    color: #fff;
+}
+
+.icon {
+    width: 25px;
+}
+.fa-arrow-right-from-bracket:hover {
+    cursor: pointer;   
+}
+
+.fa-eraser:hover {
+    cursor: pointer;
+}
