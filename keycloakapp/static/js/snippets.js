@@ -16,7 +16,7 @@ function removeGroup(clickedElement) {
 
   $.ajax({
     type: 'POST',
-    url: "/removeGroup",
+    url: "/api-removegroup",
     data: JSON.stringify({'group': group, 'user': user}),
     contentType: 'application/json',
     success: function(data){
@@ -31,7 +31,7 @@ function addGroup(clickedElement) {
 
   $.ajax({
     type: 'POST',
-    url: "/addGroup",
+    url: "/api-addgroup",
     data: JSON.stringify({'group': group, 'user': user}),
     contentType: 'application/json',
     success: function(data){
@@ -40,8 +40,59 @@ function addGroup(clickedElement) {
   })
 }
 
-function user() {
+function generateSerialNumber() {
+
+  $.ajax({
+    type: 'GET',
+    url: "/api-getlastserial",
+    contentType: 'application/json',
+    success: function(data){
+      var date = new Date()
+      serialNumber = Number(data.slice(0, 4)) + 1
+      const month = ("0" + (date.getMonth() + 1)).slice(-2)
+      serialNumber += date.getFullYear().toString() + month.toString()
+      $("#modal-id").removeClass('spinner-border')
+      $("#modal-id").val(serialNumber)
+      console.log(serialNumber)
+    }
+  })
+}
+
+async function modifyCoCoop(number, value) {
+  await $.ajax({
+    type: 'GET',
+    url: "/api-getuserbynumber?number=" + number,
+    contentType: 'application/json',
+    success: function(data){
+      if( data != 'error' ){
+        for ( const prop in data['attributes'] ) {
+          var attribute = data['attributes'][`${prop}`][0]
+          
+          if( prop == "co-coop" ) {
+            data['attributes'][`${prop}`][0] = value
+          }
+        }
+
+        const payload = { 'firstName': data['firstName'], 'lastName': data['lastName'], 'email': data['email'], 'attributes': data['attributes'] }
+        const datas = { 'id': data['id'], 'payload': payload }
+
+        $.ajax({
+          type: 'POST',
+          url: "/api-modifyuser",
+          data: JSON.stringify(datas),
+          contentType: 'application/json',
+          success: function(data){
+          }
+        })
+      }
+    }
+  })
+}
+
+async function user() {
   var sendRequest = true
+
+  $("#modal-spinner").show()
 
   var action = $("#action").text()
   var id = $("#user-id").text()
@@ -75,6 +126,12 @@ function user() {
     $("#modal-birthday").addClass('is-invalid')
   }
 
+  if( $("#modal-co-coop").val() != "" ) {
+    cocoop = $("#modal-co-coop").val().split(' - ')[1]
+  } else {
+    cocoop = ""
+  }
+
   const attributes = { 
                       'id': [$("#modal-id").val()],
                       'adresse.adresse': [$("#modal-adress").val()], 
@@ -86,6 +143,7 @@ function user() {
                       'date_naissance': [birthday],
                       'profession': [profession],
                       'conjoint': [$("#modal-spouse").val()],
+                      'co-coop': [cocoop],
                       'genre': [$("#modal-gender").val()], 
                       'statut': [$("#modal-status").val()], 
                       'locale': 'fr'
@@ -93,11 +151,13 @@ function user() {
 
   if( action == "new" ) {
     const datas = { 'firstName': firstName, 'lastName': lastName, 'email': email, 'attributes': attributes }
-  
+    
+    await modifyCoCoop(cocoop, $("#modal-id").val())
+    
     if( sendRequest ){
       $.ajax({
         type: 'POST',
-        url: "/apinewuser",
+        url: "/api-newuser",
         data: JSON.stringify(datas),
         contentType: 'application/json',
         success: function(data){
@@ -112,10 +172,16 @@ function user() {
   } else {
     const payload = { 'firstName': firstName, 'lastName': lastName, 'email': email, 'attributes': attributes }
     const datas = { 'id': id, 'payload': payload }
+    const oldcocoop = $("#co-coop-modify").text()
+
+    if( oldcocoop != "" ) {
+      await modifyCoCoop(oldcocoop, "")
+    }
+    await modifyCoCoop(cocoop, $("#modal-id").val())
 
     $.ajax({
       type: 'POST',
-      url: "/apimodifyuser",
+      url: "/api-modifyuser",
       data: JSON.stringify(datas),
       contentType: 'application/json',
       success: function(data){
@@ -123,10 +189,32 @@ function user() {
           window.location.replace("/users/?lastName="+lastName+"&firstName="+firstName+"&appId=")
         }
       }
-    })    
+    })
   }
 }
 
+function activation() {
+  var id = $("#user-id").text()
+  var activation = $("#activation").text()
+  var firstName = $("#firstName").val()
+  var lastName = $("#lastName").val()
+  const datas = { "activation": activation, "id": id }
+
+  $.ajax({
+    type: 'POST',
+    url: "/api-activation",
+    data: JSON.stringify(datas),
+    contentType: 'application/json',
+    success: function(data){
+      if( data['message'] != 'error' ){
+        $("#modal-spinner").hide()
+        window.location.replace("/users/?lastName="+lastName+"&firstName="+firstName+"&appId=")
+      } else {
+        console.log(data['content'].split(':')[2].split('}')[0])
+      }
+    }
+  })
+}
 
 /***************************************************************************************/
 /*** J'efface les 3 champs de recherche et je referme les listes dépliées ***/
@@ -152,6 +240,8 @@ $(document).ready(function(){
       $(this).show()
     }
   })
+  $("#modal-spinner").hide()
+  $("#modal-co-coop").autocomplete({ source: '../api-getusers?req=' + $("#modal-co-coop").val() })
 
   $("#userModal").on("show.bs.modal", function(event) {
     // Get the button that triggered the modal
@@ -173,6 +263,7 @@ $(document).ready(function(){
     if( action == "new" ){
       $(".modal-header").removeClass("header-primary")
       $(".modal-header").addClass("header-success")
+      $("#modal-id").addClass("spinner-border")
     } else {
       $(".modal-header").removeClass("header-success")
       $(".modal-header").addClass("header-primary")
@@ -182,6 +273,7 @@ $(document).ready(function(){
 
     if( value != "") {
       var user = JSON.parse(value)
+      $("#co-coop-modify").html(user['user']['attributes']['co-coop'][0].split(' - ')[1])
 
       $('#user-id').html(user['user']['id'])
       $("#modal-lastName").val(user['user']['lastName'])
@@ -195,9 +287,12 @@ $(document).ready(function(){
       $("#modal-phone").val(user['user']['attributes']['telephone'])
       $("#modal-birthday").val(user['user']['attributes']['date_naissance'])
       $("#modal-profession").val(user['user']['attributes']['profession'])
-      $("#modal-spouse").val(user['user']['attributes']['spouse'])
+      $("#modal-spouse").val(user['user']['attributes']['conjoint'])
+      $("#modal-co-coop").val(user['user']['attributes']['co-coop'])
       $("#modal-gender").val(user['user']['attributes']['genre'])
       $("#modal-status").val(user['user']['attributes']['statut'])
+    } else {
+      generateSerialNumber()
     }
   })
 })
@@ -205,6 +300,7 @@ $(document).ready(function(){
 $("#userModal").on("hide.bs.modal", function(event) {
   $('#action').text("")
   $('#user-id').text("")
+  $("#co-coop-modify").text("")
   $("#modal-lastName").val("")
   $("#modal-firstName").val("")
   $("#modal-email").val("")
@@ -217,8 +313,39 @@ $("#userModal").on("hide.bs.modal", function(event) {
   $("#modal-birthday").val("")
   $("#modal-profession").val("")
   $("#modal-spouse").val("")
+  $("#modal-co-coop").val("")
   $("#modal-gender").val("")
   $("#modal-status").val("")
+})
+
+$("#activationUserModal").on("show.bs.modal", function(event) {
+  var button = $(event.relatedTarget)
+  var id = button.data("id")
+  var fullName = button.data("fullname")
+  fullName = fullName.replace(/\['/g, '')
+  fullName = fullName.replace(/']/g, '')
+  var activation = button.data("activation")
+
+  $('#user-id').html(id)
+  $('#activation').html(activation)
+  $("#modal-user-fullname").html(fullName)
+
+  if( activation == "disable" ) {
+    $("#modal-user-header").html("Désactivation d'un coopérateur")
+    $(".modal-header").removeClass("header-success")
+    $(".modal-header").addClass("bg-danger")
+    $(".modal-header").addClass("text-white")
+  } else {
+    $("#modal-user-header").html("Activation d'un coopérateur")
+    $(".modal-header").removeClass("bg-danger")
+    $(".modal-header").removeClass("text-white")
+    $(".modal-header").addClass("header-success")
+  }
+})
+
+$("#userModal").on("hide.bs.modal", function(event) {
+  $('#user-id').text("")
+  $("#modal-user-fullname").html("")
 })
 
 $(".name").click( function(){

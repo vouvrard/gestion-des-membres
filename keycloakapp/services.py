@@ -29,6 +29,7 @@ else:
 # email
 # firstname
 # lastname
+# credentials {value}
 # attributes {id, 
 #             adresse.adresse, 
 #             adresse.code_postal, 
@@ -46,6 +47,8 @@ def adduser(email, firstName, lastName, attributes):
                                             "enabled": True,
                                             "firstName": firstName,
                                             "lastName": lastName,
+                                            "credentials": [{"value" : "azerty"}],
+                                            "requiredActions": ["VERIFY_EMAIL", "UPDATE_PASSWORD"],
                                             "attributes": attributes })
         payload = { "message": "", "content": user }
     except Exception as err:
@@ -70,11 +73,62 @@ def updateuser(userId, payload):
         print("[ERROR] - updateuser - Connexion au serveur keycloak impossible - ", err)
         return "error"
 
-def getusers(lastName, firstName, appId):
-    query = "id:" + appId
+#-----------------------------------------------------------------------------------------#
+# Enable or Disable a User
+#
+# activation
+# userId
+#
+#-----------------------------------------------------------------------------------------#
+def activation(activation, userId):
+    if activation == "disable":
+        payload = {"enabled": False}
+    else:
+        payload = {"enabled": True}
+
+    try:
+        response = keycloak_admin.update_user(  user_id = userId,
+                                                payload = payload)
+        return response
+    except Exception as err:
+        print("[ERROR] - activation - Connexion au serveur keycloak impossible - ", err)
+        return "error"
+       
+# ****** TEST ******#
+def getallusers():
+    try:
+        users = keycloak_admin.get_users()
+        if users: 
+            payload = { "message": "", "users": users }
+        else:
+            payload = { "message": "Pas de réponse à votre requête", "users": users }
+    except Exception as err:
+        payload = { "message": "Erreur de connexion au serveur Keycloak", "users": []}
+        print("[ERROR] - getusers - Connexion au serveur keycloak impossible - ", err)
+    
+    return payload
+#--------------------#
+
+def getusers(lastName, firstName, query):
+    #query = "id:" + appId
 
     try:
         users = keycloak_admin.get_users({"lastName" : lastName, "firstName" : firstName, "q" : query })
+        if users: 
+            payload = { "message": "", "users": users }
+        else:
+            payload = { "message": "Pas de réponse à votre requête", "users": users }
+    except Exception as err:
+        payload = { "message": "Erreur de connexion au serveur Keycloak", "users": []}
+        print("[ERROR] - getusers - Connexion au serveur keycloak impossible - ", err)
+    
+    return payload
+
+def getusers4autocomplete(search):
+    #query = "id:" + appId
+
+    try:
+        users = keycloak_admin.get_users({"search" : search })
         if users: 
             payload = { "message": "", "users": users }
         else:

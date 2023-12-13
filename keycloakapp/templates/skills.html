@@ -6,7 +6,7 @@
       <div class="row">
         <div class="col-4 border pt-2 rounded">
           <div class="card">
-            <div class="card-header card-header-color text-white">Recherche</div>
+            <div class="card-header card-header-skills-color text-white">Recherche</div>
             <div class="card-body">
               <form action="/skills" method="get">
                 <div>
@@ -49,7 +49,12 @@
           {% if message %}<div class="alert alert-danger">{{ message }}</div>{% endif %}
           {% for key, value in users_to_display.items() %}
           <div class="row align-items-center mb-2 ms-1 me-1 border rounded shadow bg-white user-container" id="{{value.user['id']}}">
-            <div class="col-6 text-start name"><b>{{ value.user['lastName'] }} {{ value.user['firstName'] }}</b> - 
+            {%if value.user['enabled'] == True %}
+            <div class="col-7 text-success text-start name">
+            {% else %}
+            <div class="col-7 text-danger text-start name">
+            {% endif %}
+              <b>{{ value.user['lastName'] }} {{ value.user['firstName'] }}</b></br>
               {% set attributes = value.user['attributes'] %}
               <i>{{ attributes.id[0] }}</i>
             </div>
@@ -70,7 +75,7 @@
                 {% endfor %}
               </ul>
             </div>
-          <div class="col-1"></div>
+          
         </div>
         {% endfor %}
         </div>

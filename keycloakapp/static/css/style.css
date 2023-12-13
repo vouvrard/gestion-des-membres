@@ -17,8 +17,12 @@ body {
     height: 100px;   /* Hauteur du pied de page */
  }
 
- .card-header-color {
+.card-header-color, .card-header-skills-color {
     background-color: #0d6efd;
+ }
+
+.card-header-users-color {
+    background-color: #198754;
  }
 
 .name { 

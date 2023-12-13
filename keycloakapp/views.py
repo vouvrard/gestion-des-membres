@@ -6,7 +6,7 @@ from flask_session import Session
 from werkzeug.middleware.proxy_fix import ProxyFix
 from keycloak import KeycloakOpenID
 
-from .services import getusers, getgroupsbyuser, getGroupsByName, addGroup, removeGroup, adduser, updateuser
+from .services import getallusers, getusers, getusers4autocomplete, getgroupsbyuser, getGroupsByName, addGroup, removeGroup, adduser, updateuser, activation
 from .tools import getsecret
 
 #
@@ -16,6 +16,11 @@ def get_lastName(item):
      lastName = item[1]['user']['lastName']
 
      return lastName
+
+def get_year(item):
+    year = item[1]['year']
+
+    return year
 
 #
 #--- Début du programme principal ---#
@@ -116,15 +121,27 @@ def skills():
         firstName = args.get("firstName")
         appId = args.get("appId")
 
+        #- Make the list of attributes
+        attributes = os.environ['KEYCLOAK_USER_ATTRIBUTES'].split(',')
+
         if lastName or firstName or appId:
-            usersResult = getusers(lastName, firstName, appId)
+            usersResult = getusers(lastName, firstName, "id:" + appId)
 
             if not usersResult["message"]: 
                 users = usersResult["users"]
 
                 for user in users:
                     authGroup = False
-                    userAttributes = user["attributes"]
+
+                    if "attributes" not in user: 
+                        user['attributes'] = {}
+
+                    #- Initialize each attribute if not exist
+                    for attribute in attributes:
+                        if not attribute in user['attributes']:
+                            user['attributes'][attribute] = ['']
+
+                    userAttributes = user['attributes']
                     userGroupResult = getgroupsbyuser(user['id'])
 
                     if not userGroupResult["message"]:
@@ -153,6 +170,24 @@ def skills():
     else:
         return redirect("/index", code=302) 
 
+@app.route('/allusers/')
+def allusers():
+    i = 0
+    usersToSort = {}
+    usersResult = getallusers()
+    users = usersResult["users"]
+    for user in users:
+        if 'attributes' in user:
+            if 'id' in user["attributes"]:
+                idCoop = user["attributes"]["id"][0]
+                usersToSort[idCoop] = {'year': user["attributes"]["id"][0][-6:], 'idCoop': idCoop}
+    
+    usersToDisplay = sorted(usersToSort.items(), key=get_year)
+    for user in usersToDisplay:
+        i = i + 1
+        print(str(i) + ' : ' + user[1]['year'] + ' ' + user[1]['idCoop'])
+
+
 @app.route('/users/')
 def users():
     if session['token']:
@@ -175,31 +210,38 @@ def users():
         attributes = os.environ['KEYCLOAK_USER_ATTRIBUTES'].split(',')
 
         if lastName or firstName or appId:
-            usersResult = getusers(lastName, firstName, appId)
+            usersResult = getusers(lastName, firstName, "id:" + appId)
 
             if not usersResult["message"]: 
                 users = usersResult["users"]
 
                 for user in users:
                     authGroup = False
-                    userAttributes = user["attributes"]
+
+                    if "attributes" not in user: 
+                        user['attributes'] = {}
 
                     #- Initialize each attribute if not exist
                     for attribute in attributes:
-                        if not attribute in userAttributes:
-                            userAttributes[attribute] = ''
-     
+                        if not attribute in user['attributes']:
+                            user['attributes'][attribute] = ['']
+
+                    #- Mise en forme de l'attribu conjoint
+                    if user['attributes']['co-coop'] != [""]:
+                        spouse = getusers("", "", "id:" + user['attributes']['co-coop'][0])
+                        user['attributes']['co-coop'] = [spouse['users'][0]['attributes']['fullName'][0] + ' - ' + user['attributes']['co-coop'][0]]
+
                     userGroupResult = getgroupsbyuser(user['id'])
 
                     if not userGroupResult["message"]:
-                        #- Test if the ser is in the Elefan's user group -#
+                        #- Test if the user is in the Elefan's user group -#
                         for group in userGroupResult["groups"]:
                             if group["path"] == os.environ["KEYCLOAK_AUTH_ELEFAN_GROUP_PATH"]:
                                 authGroup = True
 
                         if authGroup:
                             user_groups = userGroupResult["groups"]
-                            usersToSort[user['id']] = {'user': user, 'user_attributes': userAttributes, 'user_groups': user_groups}
+                            usersToSort[user['id']] = {'user': user, 'user_groups': user_groups}
 
                 usersToDisplay = sorted(usersToSort.items(), key=get_lastName)
 
@@ -217,25 +259,26 @@ def users():
     else:
         return redirect("/index", code=302) 
 
-###----- API PART -----###
-@app.route('/addGroup/', methods=('GET', 'POST'))
-def addGroupToUser():
+########----- API PART -----########
+
+@app.route('/api-addgroup/', methods=('GET', 'POST'))
+def api_addgroup():
     if request.method == "POST":
         datas = request.get_json()
         addGroup(datas['user'], datas['group'])
 
     return ("ok")
 
-@app.route('/removeGroup/', methods=('GET', 'POST'))
-def removeGroupToUser():
+@app.route('/api-removegroup/', methods=('GET', 'POST'))
+def api_removegroup():
     if request.method == "POST":
         datas = request.get_json()
         removeGroup(datas['user'], datas['group'])
 
     return ("ok")
 
-@app.route('/apinewuser/', methods=('GET', 'POST'))
-def addUser():
+@app.route('/api-newuser/', methods=('GET', 'POST'))
+def api_newuser():
     if request.method == "POST":
         datas = request.get_json()
         result = adduser(datas['email'], datas['firstName'], datas['lastName'], datas['attributes'])
@@ -244,8 +287,8 @@ def addUser():
         else:
             return result
 
-@app.route('/apimodifyuser/', methods=('GET', 'POST'))
-def modifyUser():
+@app.route('/api-modifyuser/', methods=('GET', 'POST'))
+def api_modifyuser():
     if request.method == "POST":
         datas = request.get_json() 
         result = updateuser(datas['id'], datas['payload'])
@@ -253,6 +296,53 @@ def modifyUser():
             return 'error'
         else:
             return result
-        
+
+@app.route('/api-activation/', methods=('GET', 'POST'))
+def api_activation():
+    if request.method == "POST":
+        datas = request.get_json()     
+        result = activation(datas['activation'], datas['id'])
+        if result == "error":
+            return 'error'
+        else:
+            return result        
+
+@app.route('/api-getusers/', methods=('GET', 'POST'))
+def api_getusers():
+    if request.method == "GET":
+        users = []
+        args = dict(request.args)
+        req = args.get("term")
+
+        result = getusers4autocomplete(req)
+        if result == "error":
+            return 'error'
+        else:
+            for user in result['users']:
+                users.append(user['attributes']['fullName'][0] + ' - ' + user['attributes']['id'][0])
+            
+            return users
+
+@app.route('/api-getlastserial/', methods=('GET', 'POST'))
+def api_getlastserial():
+    if request.method == "GET":
+        serialNumbers = []
+        result = getusers("", "", "")
+        for user in result['users']:
+            if "attributes" in user:
+                if "id" in user['attributes']:
+                    serial = user['attributes']['id'][0].zfill(10)
+                    serialNumbers.append(serial)
+
+    return sorted(serialNumbers)[-1]
+
+@app.route('/api-getuserbynumber/', methods=('GET', 'POST'))
+def getuserbynumber():
+    if request.method == "GET":
+        args = dict(request.args)
+        number = args.get("number")
+        result = getusers("", "", "id:" + number)
+        return result['users'][0]
+
 if __name__ == "__main__":
         app.run()

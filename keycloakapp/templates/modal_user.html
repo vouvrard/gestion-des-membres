@@ -9,6 +9,7 @@
         <div class="modal-body">
           <div class="visually-hidden" id="user-id"></div>
           <div class="visually-hidden" id="action"></div>
+          <div class="visually-hidden" id="co-coop-modify"></div>
             <form>
                 <div class="row align-items-center">
                     <div class="col-2">
@@ -112,10 +113,18 @@
                   <div class="col-2">
                       <label for="inputSpouse" class="form-label">Conjoint</label>
                   </div>
-                  <div class="col-10">
+                  <div class="col-10 ui-front">
                     <input type="text" id="modal-spouse" class="form-control" name="spouse">
                   </div>
               </div>
+              <div class="row g-3 mt-1 align-items-center">
+                <div class="col-2">
+                    <label for="inputCoCoop" class="form-label">Co-coop</label>
+                </div>
+                <div class="col-10 ui-front">
+                  <input type="text" id="modal-co-coop" class="form-control" name="co-coop">
+                </div>
+            </div>
               <div class="row g-3 mt-1 align-items-center">
                 <div class="col-2">
                     <label for="inputStatus" class="form-label">Statut</label>
@@ -131,7 +140,10 @@
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-            <button type="button" class="btn btn-primary" onclick="user()">Valider</button>
+            <button type="button" class="btn btn-primary" onclick="user()">
+              <span id="modal-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              Valider
+            </button>
         </div>
       </div>
     </div>
